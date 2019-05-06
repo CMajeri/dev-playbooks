@@ -1,0 +1,185 @@
+---
+
+- name: Get facts
+  hosts: all
+  become: yes
+  tasks:
+  - debug: msg="gathering facts"
+
+- name: Install various required packages
+  hosts: "{{ hosts | default('all') }}"
+  become: yes
+  tasks:
+  - include_role:
+      name: bootstrap
+    tags: system, full, bootstrap
+
+- name: Get and install CA certificates
+  hosts: "{{ hosts | default('all') }}"
+  become: yes
+  tasks:
+  - include_role:
+      name: certificates
+    tags: system, full, ca, pki
+
+- name: Update dns
+  hosts: "{{ hosts | default('all') }}"
+  become: yes
+  tasks:
+  - include_role:
+      name: resolver
+    tags: system, full, resolver
+
+- name: Install and run etcd
+  hosts: "{{ hosts | default('all') }}"
+  become: yes
+  tasks:
+  - include_role:
+      name: etcd
+    tags: system, full, etcd
+
+- name: Install and run flannel
+  hosts: "{{ hosts | default('all') }}"
+  become: yes
+  tasks:
+  - include_role:
+      name: flannel
+    tags: system, full, flannel
+
+- name: Install and start Docker
+  hosts: "{{ hosts | default('all') }}"
+  become: yes
+  tasks:
+  - include_role:
+      name: docker
+    tags: system, full, docker
+
+- name: Install and start Kubernetes
+  hosts: "{{ hosts | default('all') }}"
+  become: yes
+  tasks:
+  - include_role:
+      name: kubernetes
+    tags: system, full, kubernetes
+
+- name: Install the kubernetes dns
+  hosts: "{{ hosts | default('all') }}"
+  become: yes
+  tasks:
+  - include_role:
+      name: kube-dns
+    tags: system, full, kube-dns
+
+
+- name: Install the ingress controller
+  hosts: "{{ hosts | default('all') }}"
+  become: yes
+  tasks:
+  - include_role:
+      name: ingress-controller
+    tags: system, full, ingress-controller
+
+- name: Install the docker registry
+  hosts: "{{ hosts | default('all') }}"
+  become: yes
+  tasks:
+  - include_role:
+      name: docker-registry
+    tags: system, full, docker-registry
+
+- name: Build, push, and deploy cockroach
+  hosts: "{{ hosts | default('cockroach') }}"
+  become: yes
+  tasks:
+  - include_role:
+      name: cockroach
+    tags: app, full, cockroach
+
+- name: Build, push, and deploy blockchaind
+  hosts: "{{ hosts | default('kube-slave') }}"
+  become: yes
+  tasks:
+  - include_role:
+      name: blockchaind
+    tags: app, full, blockchaind
+
+- name: Build, push, and deploy taurus-proxy
+  hosts: "{{ hosts | default('kube-slave') }}"
+  become: yes
+  tasks:
+  - include_role:
+      name: taurus-proxy
+    tags: app, full, taurus-proxy
+
+- name: Build and push the vpn sidecar
+  hosts: "{{ hosts | default('kube-slave') }}"
+  become: yes
+  tasks:
+  - include_role:
+      name: vpn-sidecar
+    tags: app, full, vpn-sidecar
+
+- name: Build, push, and deploy taurus-validator-core on cockroach
+  hosts: "{{ hosts | default('kube-slave') }}"
+  become: yes
+  tasks:
+  - include_role:
+      name: taurus-validator-core-cockroach
+    tags: app, full, taurus-validator-core-cockroach
+
+- name: Build, push, and deploy taurus-vault
+  hosts: "{{ hosts | default('kube-slave') }}"
+  become: yes
+  tasks:
+  - include_role:
+      name: taurus-vault
+    tags: app, full, taurus-vault
+
+- name: Deploy sqlserver
+  hosts: "{{ hosts | default('sqlserver') }}"
+  become: yes
+  tasks:
+  - include_role:
+      name: sqlserver
+    tags: app, full, sqlserver
+
+# - name: Build, push, and deploy taurus-validator-core on sqlserver
+#   hosts: "{{ hosts | default('all') }}"
+#   become: yes
+#   tasks:
+#   - include_role:
+#       name: taurus-validator-core-sqlserver
+#     tags: app, full, taurus-validator-core-sqlserver
+#
+
+- name: Deploy hellod
+  hosts: "{{ hosts | default('kube-slave') }}"
+  become: yes
+  tasks:
+  - include_role:
+      name: hellod
+    tags: app, full, hellod
+
+- name: Deploy influx
+  hosts: "{{ hosts | default('influx') }}"
+  become: yes
+  tasks:
+  - include_role:
+      name: influx
+    tags: app, full, influx
+
+- name: Deploy chronograf
+  hosts: "{{ hosts | default('chronograf') }}"
+  become: yes
+  tasks:
+  - include_role:
+      name: chronograf
+    tags: app, full, chronograf
+
+- name: Deploy telegraf
+  hosts: "{{ hosts | default('all') }}"
+  become: yes
+  tasks:
+  - include_role:
+      name: telegraf
+    tags: app, full, telegraf
